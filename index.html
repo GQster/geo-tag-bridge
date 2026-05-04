@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEO Tag Signaling Bridge</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            background: #1e293b;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 { color: #38bdf8; margin-bottom: 0.5rem; }
+        p { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+        .btn {
+            background: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 1rem;
+            transition: transform 0.2s;
+        }
+        .btn:active { transform: scale(0.98); }
+        #qrcode {
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+        textarea {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: #38bdf8;
+            border-radius: 0.5rem;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>GEO TAG BRIDGE</h1>
+        <p>Zero-Cost P2P Signaling via Deep Links</p>
+        
+        <div id="setup">
+            <button class="btn" onclick="showHost()">HOST A GAME</button>
+            <button class="btn" style="background: #94a3b8" onclick="showJoin()">JOIN A GAME</button>
+        </div>
+
+        <div id="host-view" style="display:none">
+            <p>Paste the Offer SDP from the app:</p>
+            <textarea id="offer-sdp" placeholder="Paste SDP from app..."></textarea>
+            <button class="btn" onclick="generateLink()">GENERATE LOBBY LINK</button>
+            <canvas id="qrcode"></canvas>
+            <div id="link-output" style="word-break: break-all; font-size: 0.7rem; color: #38bdf8;"></div>
+        </div>
+
+        <div id="join-view" style="display:none">
+            <p>Scanning the Host's QR will open the app automatically.</p>
+            <p>If that fails, paste the link here:</p>
+            <textarea id="join-link" placeholder="Paste lobby link..."></textarea>
+            <button class="btn" onclick="openInApp()">OPEN IN APP</button>
+        </div>
+    </div>
+
+    <script>
+        function showHost() {
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('host-view').style.display = 'block';
+        }
+        function showJoin() {
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('join-view').style.display = 'block';
+        }
+
+        function generateLink() {
+            const sdp = document.getElementById('offer-sdp').value;
+            const link = `geo-tag-p2p://lobby?offer=${btoa(sdp)}`;
+            document.getElementById('link-output').innerText = link;
+            
+            const canvas = document.getElementById('qrcode');
+            canvas.style.display = 'block';
+            QRCode.toCanvas(canvas, link, function (error) {
+                if (error) console.error(error);
+            });
+        }
+
+        function openInApp() {
+            const link = document.getElementById('join-link').value;
+            if (link.startsWith('geo-tag-p2p://')) {
+                window.location.href = link;
+            } else {
+                alert('Invalid Lobby Link');
+            }
+        }
+    </script>
+</body>
+</html>
